@@ -1,0 +1,13 @@
+collection:
+  # How often to collect stats data (in minutes)
+  intervalMinutes: 10
+  # How many days of data to keep (max 30 days)
+  dataRetentionDays: 14
+
+features:
+  # Enable TPS tracking (may have slight performance impact)
+  enableTpsTracking: true
+  # Maximum number of players that can be returned in top players endpoint
+  maxTopPlayersLimit: 100
+  # Save player playtime data immediately when player quits (recommended)
+  saveOnPlayerQuit: true

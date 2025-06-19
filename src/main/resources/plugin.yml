@@ -1,0 +1,8 @@
+name: StatsCatwalk
+version: '${version}'
+main: dev.ua.ikeepcalm.statsCatwalk.StatsCatwalk
+api-version: '1.21'
+authors: [ ikeepcalm ]
+description: "Advanced server statistics tracking and API for Minecraft servers"
+website: "https://uaproject.xyz"
+depend: [ CatWalk ]
