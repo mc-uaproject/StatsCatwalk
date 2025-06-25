@@ -1,6 +1,8 @@
 package dev.ua.ikeepcalm.statsCatwalk.manager;
 
 import dev.ua.ikeepcalm.statsCatwalk.StatsCatwalk;
+import dev.ua.ikeepcalm.statsCatwalk.api.response.OnlinePlayerData;
+import dev.ua.ikeepcalm.statsCatwalk.api.response.TopPlayerData;
 import dev.ua.ikeepcalm.statsCatwalk.config.StatsConfig;
 import dev.ua.ikeepcalm.statsCatwalk.utils.TpsTracker;
 import org.bukkit.Bukkit;
@@ -271,8 +273,8 @@ public class StatsManager {
         return summary;
     }
 
-    public List<Map<String, Object>> getOnlinePlayersData(int days) {
-        List<Map<String, Object>> data = new ArrayList<>();
+    public List<OnlinePlayerData> getOnlinePlayersData(int days) {
+        List<OnlinePlayerData> data = new ArrayList<>();
         long cutoffTime = System.currentTimeMillis() - (days * 24 * 60 * 60 * 1000L);
 
         for (Map.Entry<Long, Integer> entry : onlinePlayerHistory.entrySet()) {
@@ -283,17 +285,18 @@ public class StatsManager {
                 LocalDateTime dateTime = LocalDateTime.ofInstant(
                         java.time.Instant.ofEpochMilli(timestamp), serverTimeZone);
 
-                Map<String, Object> point = new HashMap<>();
-                point.put("timestamp", timestamp);
-                point.put("online", playerCount);
-                point.put("hour", dateTime.getHour());
-                point.put("day", dateTime.getDayOfWeek().toString());
+                OnlinePlayerData point = OnlinePlayerData.builder()
+                        .timestamp(timestamp)
+                        .online(playerCount)
+                        .hour(dateTime.getHour())
+                        .day(dateTime.getDayOfWeek().toString())
+                        .build();
 
                 data.add(point);
             }
         }
 
-        data.sort(Comparator.comparing(m -> (Long) m.get("timestamp")));
+        data.sort(Comparator.comparing(OnlinePlayerData::getTimestamp));
         return data;
     }
 
@@ -324,12 +327,12 @@ public class StatsManager {
         return result;
     }
 
-    public List<Map<String, Object>> getTopPlayers(int limit) {
+    public List<TopPlayerData> getTopPlayers(int limit) {
         if (limit > config.getMaxTopPlayersLimit()) {
             limit = config.getMaxTopPlayersLimit();
         }
 
-        List<Map<String, Object>> result = new ArrayList<>();
+        List<TopPlayerData> result = new ArrayList<>();
         Map<UUID, Long> combinedPlaytimes = new HashMap<>(playerPlaytimes);
 
         long currentTime = System.currentTimeMillis();
@@ -356,21 +359,21 @@ public class StatsManager {
 
             if (name == null) continue;
 
-            Map<String, Object> playerData = new HashMap<>();
-            playerData.put("name", name);
-            playerData.put("uuid", uuid.toString());
-            playerData.put("playtime", playtime);
-            playerData.put("online", offlinePlayer.isOnline());
+            TopPlayerData.TopPlayerDataBuilder builder = TopPlayerData.builder()
+                    .name(name)
+                    .uuid(uuid.toString())
+                    .playtime(playtime)
+                    .online(offlinePlayer.isOnline());
 
             if (offlinePlayer.isOnline()) {
                 Player player = offlinePlayer.getPlayer();
                 if (player != null) {
-                    playerData.put("level", player.getLevel());
-                    playerData.put("health", player.getHealth());
+                    builder.level(player.getLevel())
+                           .health(player.getHealth());
                 }
             }
 
-            result.add(playerData);
+            result.add(builder.build());
             count++;
         }
 

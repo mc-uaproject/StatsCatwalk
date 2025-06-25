@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
 @Builder
@@ -27,12 +26,12 @@ import java.util.Map;
                         type = "array",
                         description = "List of top players sorted by playtime or other metrics",
                         required = true,
-                        example = "[{\"nickname\": \"ikeepcalm\", \"playtime\": 12450, \"rank\": 1, \"lastSeen\": \"2024-01-01T12:00:00Z\"}]"
+                        example = "[{\"name\": \"ikeepcalm\", \"uuid\": \"123e4567-e89b-12d3-a456-426614174000\", \"playtime\": 12450000, \"online\": true, \"level\": 30, \"health\": 20.0}]"
                 )
         }
 )
 public class TopPlayersResponse {
-    
+
     @JsonProperty("players")
-    private List<Map<String, Object>> players;
+    private List<TopPlayerData> players;
 }

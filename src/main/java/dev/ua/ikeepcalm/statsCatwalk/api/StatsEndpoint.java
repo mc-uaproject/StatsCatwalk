@@ -130,7 +130,7 @@ public class StatsEndpoint {
         }
 
         try {
-            List<Map<String, Object>> playersData = statsManager.getOnlinePlayersData(days);
+            List<OnlinePlayerData> playersData = statsManager.getOnlinePlayersData(days);
             Map<String, Integer> hourlyDistribution = statsManager.getCurrentHourlyDistribution();
 
             OnlinePlayersResponse response = new OnlinePlayersResponse(playersData, hourlyDistribution);
@@ -207,7 +207,7 @@ public class StatsEndpoint {
         }
 
         try {
-            List<Map<String, Object>> result = statsManager.getTopPlayers(limit);
+            List<TopPlayerData> result = statsManager.getTopPlayers(limit);
             return CompletableFuture.completedFuture(
                     BridgeApiResponse.success(new TopPlayersResponse(result))
             );

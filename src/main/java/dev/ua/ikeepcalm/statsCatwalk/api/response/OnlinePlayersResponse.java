@@ -27,7 +27,7 @@ import java.util.Map;
                         type = "array",
                         description = "List of historical online player data entries",
                         required = true,
-                        example = "[{\"timestamp\": \"2024-01-01T12:00:00Z\", \"count\": 45, \"players\": [\"ikeepcalm\", \"player2\"]}]"
+                        example = "[{\"timestamp\": 1704067200000, \"online\": 45, \"hour\": 12, \"day\": \"MONDAY\"}]"
                 ),
                 @ApiProperty(
                         name = "hourly_distribution",
@@ -41,7 +41,7 @@ import java.util.Map;
 public class OnlinePlayersResponse {
     
     @JsonProperty("players")
-    private List<Map<String, Object>> players;
+    private List<OnlinePlayerData> players;
     
     @JsonProperty("hourly_distribution")
     private Map<String, Integer> hourlyDistribution;
