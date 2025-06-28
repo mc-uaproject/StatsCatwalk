@@ -9,8 +9,8 @@ import dev.ua.uaproject.catwalk.bridge.annotations.BridgeRequestBody;
 import dev.ua.uaproject.catwalk.bridge.source.BridgeApiResponse;
 import io.javalin.http.HttpStatus;
 import io.javalin.openapi.*;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -37,16 +37,16 @@ public class StatsEndpoint {
                                     from = StatsSummaryResponse.class,
                                     mimeType = "application/json",
                                     example = """
-                        {
-                          "summary": {
-                            "totalPlayers": 150,
-                            "averagePlaytime": 45.5,
-                            "peakOnline": 89,
-                            "currentTPS": 19.8,
-                            "uptime": 72.5
-                          }
-                        }
-                        """
+                                            {
+                                              "summary": {
+                                                "totalPlayers": 150,
+                                                "averagePlaytime": 45.5,
+                                                "peakOnline": 89,
+                                                "currentTPS": 19.8,
+                                                "uptime": 72.5
+                                              }
+                                            }
+                                            """
                             )),
                     @OpenApiResponse(status = "500", description = "Internal server error occurred while retrieving statistics",
                             content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json"))
@@ -77,8 +77,8 @@ public class StatsEndpoint {
             tags = {"Player Statistics"},
             queryParams = {
                     @OpenApiParam(
-                            name = "days", 
-                            type = Integer.class, 
+                            name = "days",
+                            type = Integer.class,
                             description = "Number of days of historical data to return (minimum 1, maximum 14, default 7)",
                             example = "7"
                     )
@@ -89,23 +89,23 @@ public class StatsEndpoint {
                                     from = OnlinePlayersResponse.class,
                                     mimeType = "application/json",
                                     example = """
-                        {
-                          "players": [
-                            {
-                              "timestamp": "2024-01-01T12:00:00Z",
-                              "count": 45,
-                              "players": ["ikeepcalm", "player2", "player3"]
-                            }
-                          ],
-                          "hourly_distribution": {
-                            "0": 12,
-                            "6": 25,
-                            "12": 67,
-                            "18": 89,
-                            "23": 34
-                          }
-                        }
-                        """
+                                            {
+                                              "players": [
+                                                {
+                                                  "timestamp": "2024-01-01T12:00:00Z",
+                                                  "count": 45,
+                                                  "players": ["ikeepcalm", "player2", "player3"]
+                                                }
+                                              ],
+                                              "hourly_distribution": {
+                                                "0": 12,
+                                                "6": 25,
+                                                "12": 67,
+                                                "18": 89,
+                                                "23": 34
+                                              }
+                                            }
+                                            """
                             )),
                     @OpenApiResponse(status = "400", description = "Invalid days parameter provided",
                             content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json")),
@@ -116,7 +116,7 @@ public class StatsEndpoint {
     @BridgeEventHandler(requiresAuth = false, description = "Returns online players historical data", logRequests = true, scopes = {"stats"})
     public CompletableFuture<BridgeApiResponse<OnlinePlayersResponse>> getOnlinePlayersData(@BridgeQueryParam("days") String daysParam) {
         int days = 7;
-        
+
         if (daysParam != null) {
             try {
                 days = Integer.parseInt(daysParam);
@@ -153,8 +153,8 @@ public class StatsEndpoint {
             tags = {"Player Statistics"},
             queryParams = {
                     @OpenApiParam(
-                            name = "limit", 
-                            type = Integer.class, 
+                            name = "limit",
+                            type = Integer.class,
                             description = "Maximum number of top players to return (minimum 1, default 10)",
                             example = "10"
                     )
@@ -165,25 +165,25 @@ public class StatsEndpoint {
                                     from = TopPlayersResponse.class,
                                     mimeType = "application/json",
                                     example = """
-                        {
-                          "players": [
-                            {
-                              "nickname": "ikeepcalm",
-                              "playtime": 12450,
-                              "rank": 1,
-                              "lastSeen": "2024-01-01T12:00:00Z",
-                              "firstJoined": "2023-06-15T08:30:00Z"
-                            },
-                            {
-                              "nickname": "player2",
-                              "playtime": 11890,
-                              "rank": 2,
-                              "lastSeen": "2024-01-01T10:45:00Z",
-                              "firstJoined": "2023-08-20T14:20:00Z"
-                            }
-                          ]
-                        }
-                        """
+                                            {
+                                              "players": [
+                                                {
+                                                  "nickname": "ikeepcalm",
+                                                  "playtime": 12450,
+                                                  "rank": 1,
+                                                  "lastSeen": "2024-01-01T12:00:00Z",
+                                                  "firstJoined": "2023-06-15T08:30:00Z"
+                                                },
+                                                {
+                                                  "nickname": "player2",
+                                                  "playtime": 11890,
+                                                  "rank": 2,
+                                                  "lastSeen": "2024-01-01T10:45:00Z",
+                                                  "firstJoined": "2023-08-20T14:20:00Z"
+                                                }
+                                              ]
+                                            }
+                                            """
                             )),
                     @OpenApiResponse(status = "400", description = "Invalid limit parameter provided",
                             content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json")),
@@ -194,7 +194,7 @@ public class StatsEndpoint {
     @BridgeEventHandler(requiresAuth = false, description = "Returns top players by playtime", logRequests = true, scopes = {"stats"})
     public CompletableFuture<BridgeApiResponse<TopPlayersResponse>> getTopPlayers(@BridgeQueryParam("limit") String limitParam) {
         int limit = 10;
-        
+
         if (limitParam != null) {
             try {
                 limit = Integer.parseInt(limitParam);
@@ -233,19 +233,19 @@ public class StatsEndpoint {
                                     from = HourlyDistributionResponse.class,
                                     mimeType = "application/json",
                                     example = """
-                        {
-                          "hourly_distribution": {
-                            "0": 12,
-                            "1": 8,
-                            "6": 25,
-                            "12": 67,
-                            "18": 89,
-                            "19": 95,
-                            "20": 87,
-                            "23": 34
-                          }
-                        }
-                        """
+                                            {
+                                              "hourly_distribution": {
+                                                "0": 12,
+                                                "1": 8,
+                                                "6": 25,
+                                                "12": 67,
+                                                "18": 89,
+                                                "19": 95,
+                                                "20": 87,
+                                                "23": 34
+                                              }
+                                            }
+                                            """
                             )),
                     @OpenApiResponse(status = "500", description = "Internal server error occurred while retrieving hourly distribution",
                             content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json"))
@@ -280,18 +280,18 @@ public class StatsEndpoint {
                     content = @OpenApiContent(
                             mimeType = "application/json",
                             example = """
-                        {
-                          "message": "Hello from client",
-                          "data": {
-                            "key": "value",
-                            "number": 42,
-                            "nested": {
-                              "test": true
-                            }
-                          },
-                          "timestamp": "2024-01-01T12:00:00Z"
-                        }
-                        """
+                                    {
+                                      "message": "Hello from client",
+                                      "data": {
+                                        "key": "value",
+                                        "number": 42,
+                                        "nested": {
+                                          "test": true
+                                        }
+                                      },
+                                      "timestamp": "2024-01-01T12:00:00Z"
+                                    }
+                                    """
                     )
             ),
             responses = {
@@ -300,18 +300,18 @@ public class StatsEndpoint {
                                     from = TestResponse.class,
                                     mimeType = "application/json",
                                     example = """
-                        {
-                          "received": {
-                            "message": "Hello from client",
-                            "data": {
-                              "key": "value",
-                              "number": 42
-                            }
-                          },
-                          "timestamp": 1704067200000,
-                          "message": "Successfully processed POST request"
-                        }
-                        """
+                                            {
+                                              "received": {
+                                                "message": "Hello from client",
+                                                "data": {
+                                                  "key": "value",
+                                                  "number": 42
+                                                }
+                                              },
+                                              "timestamp": 1704067200000,
+                                              "message": "Successfully processed POST request"
+                                            }
+                                            """
                             )),
                     @OpenApiResponse(status = "400", description = "Invalid or missing request body",
                             content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json")),
@@ -339,6 +339,140 @@ public class StatsEndpoint {
             logError("Failed to process test request", e);
             return CompletableFuture.completedFuture(
                     BridgeApiResponse.error("Failed to process test request", HttpStatus.INTERNAL_SERVER_ERROR)
+            );
+        }
+    }
+
+    @OpenApi(
+            path = "/stats/player/playtime",
+            methods = HttpMethod.GET,
+            summary = "Get player's total playtime",
+            description = "Retrieves the total playtime for a specific player by their username. Returns the cumulative " +
+                    "time the player has spent on the server, including both historical playtime and current session " +
+                    "if the player is online. Playtime is returned in milliseconds.",
+            tags = {"Player Statistics"},
+            queryParams = {
+                    @OpenApiParam(
+                            name = "player",
+                            type = String.class,
+                            description = "Player username to get playtime for",
+                            example = "ikeepcalm",
+                            required = true
+                    )
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", description = "Successfully retrieved player playtime",
+                            content = @OpenApiContent(
+                                    mimeType = "application/json",
+                                    example = """
+                                            {
+                                              "player": "ikeepcalm",
+                                              "playtime": 12450000,
+                                              "online": true
+                                            }
+                                            """
+                            )),
+                    @OpenApiResponse(status = "400", description = "Player parameter is required",
+                            content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json")),
+                    @OpenApiResponse(status = "404", description = "Player not found or has never played",
+                            content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json")),
+                    @OpenApiResponse(status = "500", description = "Internal server error occurred while retrieving playtime",
+                            content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json"))
+            }
+    )
+    @BridgeEventHandler(requiresAuth = false, description = "Returns player's total playtime", logRequests = true, scopes = {"stats"})
+    public CompletableFuture<BridgeApiResponse<Map<String, Object>>> getPlayerPlaytime(@BridgeQueryParam("player") String playerName) {
+        if (playerName == null || playerName.trim().isEmpty()) {
+            return CompletableFuture.completedFuture(
+                    BridgeApiResponse.error("Player parameter is required", HttpStatus.BAD_REQUEST)
+            );
+        }
+
+        try {
+            Long playtime = statsManager.getPlayerPlaytime(playerName.trim());
+            if (playtime == null) {
+                return CompletableFuture.completedFuture(
+                        BridgeApiResponse.error("Player not found or has never played", HttpStatus.NOT_FOUND)
+                );
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("player", playerName.trim());
+            response.put("playtime", playtime);
+            response.put("online", org.bukkit.Bukkit.getPlayer(playerName.trim()) != null);
+
+            return CompletableFuture.completedFuture(BridgeApiResponse.success(response));
+        } catch (Exception e) {
+            logError("Failed to get player playtime for: " + playerName, e);
+            return CompletableFuture.completedFuture(
+                    BridgeApiResponse.error("Failed to retrieve player playtime", HttpStatus.INTERNAL_SERVER_ERROR)
+            );
+        }
+    }
+
+    @OpenApi(
+            path = "/stats/player/level",
+            methods = HttpMethod.GET,
+            summary = "Get player's XP level",
+            description = "Retrieves the experience level for a specific player by their username. For online players, " +
+                    "returns the current XP level. For offline players, returns the last recorded XP level from " +
+                    "when they were last online. Returns null if the player has never played or no level data exists.",
+            tags = {"Player Statistics"},
+            queryParams = {
+                    @OpenApiParam(
+                            name = "player",
+                            type = String.class,
+                            description = "Player username to get XP level for",
+                            example = "ikeepcalm",
+                            required = true
+                    )
+            },
+            responses = {
+                    @OpenApiResponse(status = "200", description = "Successfully retrieved player level",
+                            content = @OpenApiContent(
+                                    mimeType = "application/json",
+                                    example = """
+                                            {
+                                              "player": "ikeepcalm",
+                                              "level": 42,
+                                              "online": false
+                                            }
+                                            """
+                            )),
+                    @OpenApiResponse(status = "400", description = "Player parameter is required",
+                            content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json")),
+                    @OpenApiResponse(status = "404", description = "Player not found or no level data available",
+                            content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json")),
+                    @OpenApiResponse(status = "500", description = "Internal server error occurred while retrieving level",
+                            content = @OpenApiContent(from = BridgeApiResponse.class, mimeType = "application/json"))
+            }
+    )
+    @BridgeEventHandler(requiresAuth = false, description = "Returns player's XP level", logRequests = true, scopes = {"stats"})
+    public CompletableFuture<BridgeApiResponse<Map<String, Object>>> getPlayerLevel(@BridgeQueryParam("player") String playerName) {
+        if (playerName == null || playerName.trim().isEmpty()) {
+            return CompletableFuture.completedFuture(
+                    BridgeApiResponse.error("Player parameter is required", HttpStatus.BAD_REQUEST)
+            );
+        }
+
+        try {
+            Integer level = statsManager.getPlayerLevel(playerName.trim());
+            if (level == null) {
+                return CompletableFuture.completedFuture(
+                        BridgeApiResponse.error("Player not found or no level data available", HttpStatus.NOT_FOUND)
+                );
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("player", playerName.trim());
+            response.put("level", level);
+            response.put("online", org.bukkit.Bukkit.getPlayer(playerName.trim()) != null);
+
+            return CompletableFuture.completedFuture(BridgeApiResponse.success(response));
+        } catch (Exception e) {
+            logError("Failed to get player level for: " + playerName, e);
+            return CompletableFuture.completedFuture(
+                    BridgeApiResponse.error("Failed to retrieve player level", HttpStatus.INTERNAL_SERVER_ERROR)
             );
         }
     }

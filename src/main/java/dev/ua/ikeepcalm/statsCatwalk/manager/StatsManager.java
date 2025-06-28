@@ -37,6 +37,7 @@ public class StatsManager {
     private final Map<String, Map<String, Integer>> hourlyDistribution = new ConcurrentHashMap<>();
     private final Map<UUID, Long> playerPlaytimes = new ConcurrentHashMap<>();
     private final Map<UUID, Long> playerSessions = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> playerLevels = new ConcurrentHashMap<>();
 
     private BukkitTask collectionTask;
 
@@ -87,8 +88,14 @@ public class StatsManager {
         playerPlaytimes.put(playerUuid, playerPlaytimes.getOrDefault(playerUuid, 0L) + sessionDuration);
         playerSessions.remove(playerUuid);
 
+        Player player = Bukkit.getPlayer(playerUuid);
+        if (player != null) {
+            playerLevels.put(playerUuid, player.getLevel());
+        }
+
         if (config.isSaveOnPlayerQuit()) {
             savePlayerPlaytimes();
+            savePlayerLevels();
         }
     }
 
@@ -116,12 +123,14 @@ public class StatsManager {
         loadOnlinePlayerHistory();
         loadHourlyDistribution();
         loadPlayerPlaytimes();
+        loadPlayerLevels();
     }
 
     private void saveData() {
         saveOnlinePlayerHistory();
         saveHourlyDistribution();
         savePlayerPlaytimes();
+        savePlayerLevels();
     }
 
     private void loadOnlinePlayerHistory() {
@@ -246,6 +255,45 @@ public class StatsManager {
             Files.write(playtimesFile, lines);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Failed to save player playtimes", e);
+        }
+    }
+
+    private void loadPlayerLevels() {
+        Path levelsFile = dataFolder.resolve("player_levels.csv");
+
+        if (Files.exists(levelsFile)) {
+            try {
+                List<String> lines = Files.readAllLines(levelsFile);
+                for (String line : lines) {
+                    String[] parts = line.split(",");
+                    if (parts.length == 2) {
+                        try {
+                            UUID uuid = UUID.fromString(parts[0]);
+                            int level = Integer.parseInt(parts[1]);
+                            playerLevels.put(uuid, level);
+                        } catch (IllegalArgumentException e) {
+                            logger.warning("Invalid data format in player levels: " + line);
+                        }
+                    }
+                }
+                logger.info("Loaded " + playerLevels.size() + " player level records");
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Failed to load player levels", e);
+            }
+        }
+    }
+
+    private void savePlayerLevels() {
+        Path levelsFile = dataFolder.resolve("player_levels.csv");
+
+        try {
+            List<String> lines = playerLevels.entrySet().stream()
+                    .map(entry -> entry.getKey() + "," + entry.getValue())
+                    .collect(Collectors.toList());
+
+            Files.write(levelsFile, lines);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Failed to save player levels", e);
         }
     }
 
@@ -388,6 +436,39 @@ public class StatsManager {
             }
         }
         return count;
+    }
+
+    public Long getPlayerPlaytime(String playerName) {
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
+        if (offlinePlayer == null || !offlinePlayer.hasPlayedBefore()) {
+            return null;
+        }
+        
+        UUID uuid = offlinePlayer.getUniqueId();
+        long storedPlaytime = playerPlaytimes.getOrDefault(uuid, 0L);
+        
+        if (playerSessions.containsKey(uuid)) {
+            long sessionStart = playerSessions.get(uuid);
+            long sessionDuration = System.currentTimeMillis() - sessionStart;
+            return storedPlaytime + sessionDuration;
+        }
+        
+        return storedPlaytime;
+    }
+    
+    public Integer getPlayerLevel(String playerName) {
+        Player player = Bukkit.getPlayer(playerName);
+        if (player != null && player.isOnline()) {
+            return player.getLevel();
+        }
+        
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
+        if (offlinePlayer.hasPlayedBefore()) {
+            UUID uuid = offlinePlayer.getUniqueId();
+            return playerLevels.get(uuid);
+        }
+        
+        return null;
     }
 
     private long calculateTotalPlaytime() {
