@@ -1,17 +1,18 @@
 package dev.ua.ikeepcalm.statsCatwalk.utils;
 
 import dev.ua.ikeepcalm.statsCatwalk.StatsCatwalk;
+import me.lucko.spark.api.Spark;
+import me.lucko.spark.api.SparkProvider;
+import me.lucko.spark.api.statistic.StatisticWindow;
+import me.lucko.spark.api.statistic.types.DoubleStatistic;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class TpsTracker {
-    private final List<Double> tpsHistory = new ArrayList<>();
     private final StatsCatwalk plugin;
     private BukkitTask trackingTask;
-    private long lastPoll = System.nanoTime();
+    private Spark spark;
+    private double currentTPS = 20.0;
 
     public TpsTracker(StatsCatwalk plugin) {
         this.plugin = plugin;
@@ -19,7 +20,7 @@ public class TpsTracker {
     }
 
     private void startTracking() {
-        trackingTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 100L, 1L);
+        trackingTask = Bukkit.getScheduler().runTaskTimer(plugin, this::updateTPS, 100L, 20L);
     }
 
     public void stop() {
@@ -28,34 +29,23 @@ public class TpsTracker {
         }
     }
 
-    private void tick() {
-        long now = System.nanoTime();
-        long timeSpent = (now - lastPoll) / 1000;
-
-        if (timeSpent == 0) timeSpent = 1;
-
-        if (tpsHistory.size() > 10) {
-            tpsHistory.remove(0);
+    private void updateTPS() {
+        try {
+            if (spark == null) {
+                spark = SparkProvider.get();
+            }
+            
+            DoubleStatistic<StatisticWindow.TicksPerSecond> tps = spark.tps();
+            if (tps != null) {
+                currentTPS = tps.poll(StatisticWindow.TicksPerSecond.MINUTES_1);
+            }
+        } catch (IllegalStateException e) {
+            // Spark is not available, keep current TPS value
         }
-
-        double tps = 20000000.0 / timeSpent;
-        if (tps <= 21) {
-            tpsHistory.add(tps);
-        }
-
-        lastPoll = now;
     }
 
     public double getTPS() {
-        if (tpsHistory.isEmpty()) {
-            return 20.0;
-        }
-
-        double sum = 0;
-        for (double tps : tpsHistory) {
-            sum += tps;
-        }
-        return sum / tpsHistory.size();
+        return currentTPS;
     }
 
     public String getTPSString() {

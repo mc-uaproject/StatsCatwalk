@@ -18,9 +18,17 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven {
+        name 'luck-repo'
+        url 'https://repo.lucko.me/'
+        content {
+            includeModule 'me.lucko', 'spark-api'
+        }
+    }
 }
 
 dependencies {
+    compileOnly 'me.lucko:spark-api:0.1-SNAPSHOT'
     compileOnly("io.javalin:javalin-bundle:6.6.0")
     compileOnly 'io.swagger.core.v3:swagger-annotations:2.2.21'
     compileOnly("io.javalin.community.openapi:javalin-openapi-plugin:6.6.0")
